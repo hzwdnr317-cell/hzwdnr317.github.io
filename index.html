@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>库存管理系统 | Inventory System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #f5f5f7;
+            --secondary-color: #ffffff;
+            --accent-color: #007aff;
+            --text-color: #1d1d1f;
+            --light-text: #86868b;
+            --border-color: #d2d2d7;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 24px;
+            color: var(--text-color);
+        }
+
+        .logo i {
+            color: var(--accent-color);
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 8px;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            background: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn:hover {
+            background-color: #f5f5f5;
+        }
+
+        .lang-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--secondary-color);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--accent-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--light-text);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: var(--primary-color);
+            transition: border 0.2s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .image-upload {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .image-upload:hover {
+            border-color: var(--accent-color);
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: #0056cc;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(0, 122, 255, 0.1);
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .search-box input {
+            padding-left: 45px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--light-text);
+        }
+
+        .inventory-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .product-item {
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            gap: 15px;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+            align-items: center;
+        }
+
+        .product-item:hover {
+            background-color: #fafafa;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            background-color: var(--primary-color);
+        }
+
+        .product-details {
+            overflow: hidden;
+        }
+
+        .product-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .product-desc {
+            font-size: 14px;
+            color: var(--light-text);
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-stock {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .stock-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .in-stock {
+            background-color: rgba(52, 199, 89, 0.1);
+            color: #34c759;
+        }
+
+        .low-stock {
+            background-color: rgba(255, 149, 0, 0.1);
+            color: #ff9500;
+        }
+
+        .out-of-stock {
+            background-color: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .action-btn:hover {
+            background-color: #e5e5e7;
+        }
+
+        .delete-btn:hover {
+            background-color: #ff3b30;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--light-text);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--border-color);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: var(--secondary-color);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--light-text);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: var(--light-text);
+            font-size: 14px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 576px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-item {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .product-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-boxes"></i>
+                <span id="app-title">库存管理系统</span>
+            </div>
+            <div class="language-selector">
+                <button class="lang-btn active" data-lang="zh">中文</button>
+                <button class="lang-btn" data-lang="pt">Português</button>
+                <button class="lang-btn" data-lang="en">English</button>
+            </div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="total-products">0</div>
+                <div class="stat-label" id="total-products-label">总产品数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-stock">0</div>
+                <div class="stat-label" id="total-stock-label">总库存</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="low-stock-count">0</div>
+                <div class="stat-label" id="low-stock-label">低库存产品</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="left-column">
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-plus-circle"></i>
+                        <span id="add-product-title">添加新产品</span>
+                    </h2>
+                    
+                    <form id="product-form">
+                        <div class="form-group">
+                            <label for="product-image" id="image-label">产品图片</label>
+                            <div class="image-upload" id="image-upload-area">
+                                <i class="fas fa-cloud-upload-alt" style="font-size: 32px; color: #86868b; margin-bottom: 10px;"></i>
+                                <p id="upload-text">点击或拖放图片到此区域</p>
+                                <input type="file" id="product-image" accept="image/*" style="display: none;">
+                                <img id="image-preview" class="image-preview" alt="预览">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="product-title" id="title-label">产品标题</label>
+                            <input type="text" id="product-title" placeholder="输入产品标题" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="product-description" id="description-label">产品简介</label>
+                            <textarea id="product-description" placeholder="输入产品简介" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="product-stock" id="stock-label">库存数量</label>
+                            <input type="number" id="product-stock" min="0" value="0" required>
+                        </div>
+                        
+                        <button type="submit" class="btn" id="submit-btn">
+                            <i class="fas fa-save"></i>
+                            <span>添加产品</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="right-column">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="搜索产品...">
+                </div>
+                
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-box-open"></i>
+                        <span id="inventory-title">库存列表</span>
+                    </h2>
+                    
+                    <div class="inventory-list" id="inventory-list">
+                        <!-- 产品列表将通过JavaScript动态生成 -->
+                        <div class="empty-state" id="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h3 id="empty-title">暂无产品</h3>
+                            <p id="empty-text">点击左侧表单添加您的第一个产品</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p id="footer-text">© 2023 库存管理系统 | 免费使用 | 苹果风格设计</p>
+        </footer>
+    </div>
+
+    <script>
+        // 多语言文本
+        const translations = {
+            zh: {
+                appTitle: "库存管理系统",
+                addProductTitle: "添加新产品",
+                inventoryTitle: "库存列表",
+                imageLabel: "产品图片",
+                titleLabel: "产品标题",
+                descriptionLabel: "产品简介",
+                stockLabel: "库存数量",
+                submitBtn: "添加产品",
+                searchPlaceholder: "搜索产品...",
+                emptyTitle: "暂无产品",
+                emptyText: "点击左侧表单添加您的第一个产品",
+                totalProductsLabel: "总产品数",
+                totalStockLabel: "总库存",
+                lowStockLabel: "低库存产品",
+                editBtn: "编辑",
+                deleteBtn: "删除",
+                saveBtn: "保存",
+                cancelBtn: "取消",
+                uploadText: "点击或拖放图片到此区域",
+                footerText: "© 2023 库存管理系统 | 免费使用 | 苹果风格设计",
+                stockStatus: {
+                    inStock: "有货",
+                    lowStock: "低库存",
+                    outOfStock: "缺货"
+                }
+            },
+            pt: {
+                appTitle: "Sistema de Estoque",
+                addProductTitle: "Adicionar Novo Produto",
+                inventoryTitle: "Lista de Estoque",
+                imageLabel: "Imagem do Produto",
+                titleLabel: "Título do Produto",
+                descriptionLabel: "Descrição do Produto",
+                stockLabel: "Quantidade em Estoque",
+                submitBtn: "Adicionar Produto",
+                searchPlaceholder: "Buscar produtos...",
+                emptyTitle: "Nenhum Produto",
+                emptyText: "Adicione seu primeiro produto usando o formulário à esquerda",
+                totalProductsLabel: "Total de Produtos",
+                totalStockLabel: "Estoque Total",
+                lowStockLabel: "Produtos com Baixo Estoque",
+                editBtn: "Editar",
+                deleteBtn: "Excluir",
+                saveBtn: "Salvar",
+                cancelBtn: "Cancelar",
+                uploadText: "Clique ou arraste uma imagem para esta área",
+                footerText: "© 2023 Sistema de Estoque | Uso Gratuito | Design no Estilo Apple",
+                stockStatus: {
+                    inStock: "Em Estoque",
+                    lowStock: "Estoque Baixo",
+                    outOfStock: "Fora de Estoque"
+                }
+            },
+            en: {
+                appTitle: "Inventory Management System",
+                addProductTitle: "Add New Product",
+                inventoryTitle: "Inventory List",
+                imageLabel: "Product Image",
+                titleLabel: "Product Title",
+                descriptionLabel: "Product Description",
+                stockLabel: "Stock Quantity",
+                submitBtn: "Add Product",
+                searchPlaceholder: "Search products...",
+                emptyTitle: "No Products",
+                emptyText: "Add your first product using the form on the left",
+                totalProductsLabel: "Total Products",
+                totalStockLabel: "Total Stock",
+                lowStockLabel: "Low Stock Products",
+                editBtn: "Edit",
+                deleteBtn: "Delete",
+                saveBtn: "Save",
+                cancelBtn: "Cancel",
+                uploadText: "Click or drag an image to this area",
+                footerText: "© 2023 Inventory System | Free to Use | Apple Style Design",
+                stockStatus: {
+                    inStock: "In Stock",
+                    lowStock: "Low Stock",
+                    outOfStock: "Out of Stock"
+                }
+            }
+        };
+
+        // 当前语言
+        let currentLang = 'zh';
+
+        // 库存数据
+        let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+        let editMode = false;
+        let currentEditId = null;
+
+        // DOM元素
+        const langButtons = document.querySelectorAll('.lang-btn');
+        const productForm = document.getElementById('product-form');
+        const searchInput = document.getElementById('search-input');
+        const inventoryList = document.getElementById('inventory-list');
+        const emptyState = document.getElementById('empty-state');
+        const imageUploadArea = document.getElementById('image-upload-area');
+        const productImageInput = document.getElementById('product-image');
+        const imagePreview = document.getElementById('image-preview');
+        const totalProductsEl = document.getElementById('total-products');
+        const totalStockEl = document.getElementById('total-stock');
+        const lowStockCountEl = document.getElementById('low-stock-count');
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置语言切换
+            langButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const lang = this.getAttribute('data-lang');
+                    setLanguage(lang);
+                    
+                    // 更新按钮状态
+                    langButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // 表单提交
+            productForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveProduct();
+            });
+            
+            // 搜索功能
+            searchInput.addEventListener('input', function() {
+                filterProducts(this.value);
+            });
+            
+            // 图片上传
+            imageUploadArea.addEventListener('click', function() {
+                productImageInput.click();
+            });
+            
+            productImageInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        imagePreview.src = event.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // 拖放图片上传
+            imageUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#007aff';
+                this.style.backgroundColor = 'rgba(0, 122, 255, 0.05)';
+            });
+            
+            imageUploadArea.addEventListener('dragleave', function() {
+                this.style.borderColor = '#d2d2d7';
+                this.style.backgroundColor = '';
+            });
+            
+            imageUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#d2d2d7';
+                this.style.backgroundColor = '';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    const file = e.dataTransfer.files[0];
+                    
+                    if (file.type.startsWith('image/')) {
+                        productImageInput.files = e.dataTransfer.files;
+                        
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            imagePreview.src = event.target.result;
+                            imagePreview.style.display = 'block';
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    }
+                }
+            });
+            
+            // 加载库存数据
+            loadInventory();
+            updateStats();
+        });
+
+        // 设置语言
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            
+            // 更新界面文本
+            document.getElementById('app-title').textContent = t.appTitle;
+            document.getElementById('add-product-title').textContent = t.addProductTitle;
+            document.getElementById('inventory-title').textContent = t.inventoryTitle;
+            document.getElementById('image-label').textContent = t.imageLabel;
+            document.getElementById('title-label').textContent = t.titleLabel;
+            document.getElementById('description-label').textContent = t.descriptionLabel;
+            document.getElementById('stock-label').textContent = t.stockLabel;
+            document.getElementById('submit-btn').innerHTML = `<i class="fas fa-save"></i><span>${t.submitBtn}</span>`;
+            document.getElementById('search-input').placeholder = t.searchPlaceholder;
+            document.getElementById('empty-title').textContent = t.emptyTitle;
+            document.getElementById('empty-text').textContent = t.emptyText;
+            document.getElementById('total-products-label').textContent = t.totalProductsLabel;
+            document.getElementById('total-stock-label').textContent = t.totalStockLabel;
+            document.getElementById('low-stock-label').textContent = t.lowStockLabel;
+            document.getElementById('upload-text').textContent = t.uploadText;
+            document.getElementById('footer-text').textContent = t.footerText;
+            
+            // 重新渲染产品列表以更新语言
+            renderInventory(inventory);
+        }
+
+        // 保存产品
+        function saveProduct() {
+            const title = document.getElementById('product-title').value;
+            const description = document.getElementById('product-description').value;
+            const stock = parseInt(document.getElementById('product-stock').value);
+            const imageSrc = imagePreview.src || 'https://via.placeholder.com/300x300.png?text=No+Image';
+            
+            if (!title || !description) {
+                alert('请填写所有必填字段');
+                return;
+            }
+            
+            if (editMode && currentEditId) {
+                // 更新现有产品
+                const index = inventory.findIndex(item => item.id === currentEditId);
+                if (index !== -1) {
+                    inventory[index] = {
+                        ...inventory[index],
+                        title,
+                        description,
+                        stock,
+                        image: imageSrc
+                    };
+                }
+                
+                // 退出编辑模式
+                editMode = false;
+                currentEditId = null;
+                document.getElementById('submit-btn').innerHTML = `<i class="fas fa-save"></i><span>${translations[currentLang].submitBtn}</span>`;
+            } else {
+                // 添加新产品
+                const newProduct = {
+                    id: Date.now(),
+                    title,
+                    description,
+                    stock,
+                    image: imageSrc
+                };
+                
+                inventory.unshift(newProduct);
+            }
+            
+            // 保存到本地存储
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            
+            // 重置表单
+            productForm.reset();
+            imagePreview.style.display = 'none';
+            imagePreview.src = '';
+            
+            // 更新界面
+            loadInventory();
+            updateStats();
+            filterProducts(searchInput.value);
+        }
+
+        // 加载库存
+        function loadInventory() {
+            renderInventory(inventory);
+        }
+
+        // 渲染库存列表
+        function renderInventory(products) {
+            const t = translations[currentLang];
+            
+            if (products.length === 0) {
+                inventoryList.innerHTML = `
+                    <div class="empty-state" id="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3 id="empty-title">${t.emptyTitle}</h3>
+                        <p id="empty-text">${t.emptyText}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            products.forEach(product => {
+                let stockClass = 'in-stock';
+                let stockText = t.stockStatus.inStock;
+                
+                if (product.stock === 0) {
+                    stockClass = 'out-of-stock';
+                    stockText = t.stockStatus.outOfStock;
+                } else if (product.stock < 10) {
+                    stockClass = 'low-stock';
+                    stockText = t.stockStatus.lowStock;
+                }
+                
+                html += `
+                    <div class="product-item" data-id="${product.id}">
+                        <img src="${product.image}" alt="${product.title}" class="product-image">
+                        <div class="product-details">
+                            <div class="product-title">${product.title}</div>
+                            <div class="product-desc">${product.description}</div>
+                            <div class="product-stock">
+                                <span>${translations[currentLang].stockLabel}: ${product.stock}</span>
+                                <span class="stock-badge ${stockClass}">${stockText}</span>
+                            </div>
+                        </div>
+                        <div class="product-actions">
+                            <button class="action-btn edit-btn" onclick="editProduct(${product.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteProduct(${product.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            inventoryList.innerHTML = html;
+        }
+
+        // 编辑产品
+        function editProduct(id) {
+            const product = inventory.find(item => item.id === id);
+            
+            if (product) {
+                document.getElementById('product-title').value = product.title;
+                document.getElementById('product-description').value = product.description;
+                document.getElementById('product-stock').value = product.stock;
+                
+                imagePreview.src = product.image;
+                imagePreview.style.display = 'block';
+                
+                editMode = true;
+                currentEditId = id;
+                
+                const t = translations[currentLang];
+                document.getElementById('submit-btn').innerHTML = `<i class="fas fa-save"></i><span>${t.saveBtn}</span>`;
+                
+                // 滚动到表单
+                document.querySelector('.left-column').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // 删除产品
+        function deleteProduct(id) {
+            if (confirm('确定要删除这个产品吗？')) {
+                inventory = inventory.filter(item => item.id !== id);
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                loadInventory();
+                updateStats();
+                filterProducts(searchInput.value);
+            }
+        }
+
+        // 过滤产品
+        function filterProducts(searchTerm) {
+            if (!searchTerm.trim()) {
+                renderInventory(inventory);
+                return;
+            }
+            
+            const filtered = inventory.filter(product => 
+                product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.description.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            renderInventory(filtered);
+        }
+
+        // 更新统计数据
+        function updateStats() {
+            const totalProducts = inventory.length;
+            const totalStock = inventory.reduce((sum, product) => sum + product.stock, 0);
+            const lowStockCount = inventory.filter(product => product.stock > 0 && product.stock < 10).length;
+            
+            totalProductsEl.textContent = totalProducts;
+            totalStockEl.textContent = totalStock;
+            lowStockCountEl.textContent = lowStockCount;
+        }
+
+        // 添加一些示例数据
+        function addSampleData() {
+            if (inventory.length === 0) {
+                inventory = [
+                    {
+                        id: 1,
+                        title: "苹果 iPhone 14 Pro",
+                        description: "最新的iPhone型号，具有动态岛和强大的摄像头系统",
+                        stock: 15,
+                        image: "https://images.unsplash.com/photo-1663499482523-1c0c1bae4ce1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"
+                    },
+                    {
+                        id: 2,
+                        title: "MacBook Air M2",
+                        description: "轻薄笔记本电脑，配备Apple M2芯片，电池续航时间长",
+                        stock: 8,
+                        image: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"
+                    },
+                    {
+                        id: 3,
+                        title: "苹果 Watch Series 8",
+                        description: "先进的智能手表，具有健康监测和健身跟踪功能",
+                        stock: 3,
+                        image: "https://images.unsplash.com/photo-1579586337278-3f6a89e28d6f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"
+                    },
+                    {
+                        id: 4,
+                        title: "iPad Pro 12.9英寸",
+                        description: "功能强大的平板电脑，适用于创意专业人士",
+                        stock: 12,
+                        image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"
+                    },
+                    {
+                        id: 5,
+                        title: "AirPods Pro 第二代",
+                        description: "无线降噪耳机，具有空间音频和自适应透明度",
+                        stock: 0,
+                        image: "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"
+                    }
+                ];
+                
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                loadInventory();
+                updateStats();
+            }
+        }
+
+        // 页面加载后添加示例数据
+        setTimeout(addSampleData, 500);
+    </script>
+</body>
+</html>
